@@ -1,3 +1,4 @@
+// App.tsx
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -10,25 +11,11 @@ import {
   Platform,
 } from "react-native";
 
-// ─── Tipagem ────────────────────────────────────────────────────────────────
-type StatusTipo = "normal" | "alerta" | "critico";
+// Importações simulando a estrutura de pastas (Ajuste os caminhos conforme sua árvore real)
+import { Medicao, StatusTipo } from "./src/types";
+import { gerarMedicao } from "./src/utils/logica";
 
-type Medicao = {
-  id: number;
-  sensor: string;
-  valor: number;
-  status: StatusTipo;
-};
-
-// ─── Constantes ─────────────────────────────────────────────────────────────
-const SENSORES = [
-  "Temperatura (°C)",
-  "Pressão (bar)",
-  "Umidade (%)",
-  "Vibração (Hz)",
-  "Tensão (V)",
-];
-
+// ─── Constantes de Interface ────────────────────────────────────────────────
 const STATUS_CONFIG: Record<
   StatusTipo,
   { label: string; cor: string; corFundo: string; corBorda: string }
@@ -53,22 +40,7 @@ const STATUS_CONFIG: Record<
   },
 };
 
-// ─── Gerador de medição aleatória ────────────────────────────────────────────
-let contadorId = 1;
-
-function gerarMedicao(): Medicao {
-  const sensor = SENSORES[Math.floor(Math.random() * SENSORES.length)];
-  const valor = parseFloat((Math.random() * 100).toFixed(2));
-  let status: StatusTipo;
-
-  if (valor < 40) status = "normal";
-  else if (valor < 75) status = "alerta";
-  else status = "critico";
-
-  return { id: contadorId++, sensor, valor, status };
-}
-
-// ─── Componente principal ────────────────────────────────────────────────────
+// ─── Componente Principal ────────────────────────────────────────────────────
 export default function App() {
   const [medicao, setMedicao] = useState<Medicao>(gerarMedicao());
   const [historico, setHistorico] = useState<Medicao[]>([]);
@@ -138,6 +110,11 @@ export default function App() {
 
   const cfg = STATUS_CONFIG[medicao.status];
 
+  // Formatar data/hora para exibição
+  const dataFormatada = medicao.data.toLocaleTimeString('pt-BR', {
+    hour: '2-digit', minute: '2-digit', second:'2-digit'
+  });
+
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#0A0C10" />
@@ -180,22 +157,26 @@ export default function App() {
           <Text style={[styles.statusTexto, { color: cfg.cor }]}>
             {cfg.label}
           </Text>
+          
+          <Text style={styles.dataTexto}>{dataFormatada}</Text>
         </View>
 
-        {/* Nome do sensor */}
+        {/* Informações Estruturadas do Sensor */}
         <Text style={styles.sensorLabel}>SENSOR</Text>
-        <Text style={styles.sensorNome}>{medicao.sensor}</Text>
+        <Text style={styles.sensorNome}>{medicao.sensor.nome}</Text>
+        <Text style={styles.tipoTexto}>Tipo: {medicao.sensor.tipo}</Text>
 
-        {/* Valor */}
+        {/* Valor + Unidade */}
         <Text style={styles.valorLabel}>LEITURA ATUAL</Text>
         <View style={styles.valorContainer}>
           <Text style={[styles.valorNumero, { color: cfg.cor }]}>
             {medicao.valor.toFixed(2)}
+            <Text style={styles.unidadeNumero}> {medicao.sensor.unidade}</Text>
           </Text>
         </View>
 
         {/* ID */}
-        <Text style={styles.idTexto}>ID #{medicao.id.toString().padStart(4, "0")}</Text>
+        <Text style={styles.idTexto}>MED #{medicao.id.toString().padStart(4, "0")}  |  SENS #{medicao.sensor.id}</Text>
       </Animated.View>
 
       {/* ── Barra de status visual ── */}
@@ -223,9 +204,11 @@ export default function App() {
                 ]}
               />
               <Text style={styles.historicoSensor} numberOfLines={1}>
-                {m.sensor}
+                {m.sensor.nome}
               </Text>
-              <Text style={styles.historicoValor}>{m.valor.toFixed(2)}</Text>
+              <Text style={styles.historicoValor}>
+                {m.valor.toFixed(1)} {m.sensor.unidade}
+              </Text>
               <Text
                 style={[
                   styles.historicoStatus,
@@ -323,6 +306,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "800",
     letterSpacing: 3,
+    flex: 1,
+  },
+  dataTexto: {
+    fontSize: 12,
+    color: "#8892A4",
+    fontWeight: "600",
   },
   sensorLabel: {
     fontSize: 10,
@@ -335,6 +324,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     color: "#E8ECF4",
+    marginBottom: 4,
+  },
+  tipoTexto: {
+    fontSize: 13,
+    color: "#8892A4",
+    fontWeight: "500",
     marginBottom: 20,
   },
   valorLabel: {
@@ -346,11 +341,18 @@ const styles = StyleSheet.create({
   },
   valorContainer: {
     marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "baseline",
   },
   valorNumero: {
     fontSize: 52,
     fontWeight: "800",
     letterSpacing: -1,
+  },
+  unidadeNumero: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#8892A4",
   },
   idTexto: {
     fontSize: 11,
