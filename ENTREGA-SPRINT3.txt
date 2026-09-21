@@ -1,0 +1,42 @@
+SPRINT 3 - INTEGRACAO MOBILE E BACKEND
+Projeto: Motiva Perseverance - Monitoramento de vegetacao em rodovias
+Turma: 2EMR
+
+INTEGRANTES
+---------------------------------------------------------------
+Vinicius Goncalves Carneiro .......... RM561784
+Henrique Augusto Cruz ................ RM564586
+Leonardo Martins Trevisan ............ RM563752
+Guilherme Gama Massela ............... RM563635
+Cristiano dos Santos ................. RM566444
+Leonardo Eiji Fabian Kowata .......... RM562934
+
+REPOSITORIOS
+---------------------------------------------------------------
+Backend (Spring Boot):  https://github.com/ViniiciusGoncalves/API-Motiva
+Frontend (React Native / Expo): https://github.com/ViniiciusGoncalves/Mobile-motiva
+
+COMO EXECUTAR
+---------------------------------------------------------------
+1) Backend - porta 8080
+   cd API-Motiva
+   mvn spring-boot:run
+   Conferir: curl http://localhost:8080/sensores
+
+2) App - Expo
+   cd mobile
+   npm install
+   npx expo start
+
+BASE_URL usada pelo app (src/services/api.ts)
+   Web / iOS .......... http://localhost:8080
+   Emulador Android ... http://10.0.2.2:8080
+   Celular fisico ..... http://<IP-DA-MAQUINA>:8080
+
+ENDPOINTS CONSUMIDOS PELO APP
+---------------------------------------------------------------
+GET  /medicoes                  lista o historico (mais recentes primeiro)
+GET  /medicoes/sensor/{id}      historico de um sensor
+GET  /sensores                  catalogo de sensores
+POST /medicoes/simular          botao "SIMULAR COLETA" (valor gerado no servidor)
+POST /medicoes                  registra uma leitura com valor informado

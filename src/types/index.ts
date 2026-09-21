@@ -1,4 +1,5 @@
 // src/types/index.ts
+// Tipos de domínio do app — o que a interface consome depois de tratado.
 
 export type StatusTipo = "normal" | "alerta" | "critico";
 
@@ -7,6 +8,8 @@ export type Sensor = {
   nome: string;
   tipo: string;
   unidade: string;
+  /** Localização do sensor na rodovia (opcional: nem toda origem informa) */
+  local?: string;
 };
 
 export type Medicao = {
@@ -14,5 +17,6 @@ export type Medicao = {
   sensor: Sensor;
   valor: number;
   data: Date;
-  status: StatusTipo; // Adicionado para facilitar a vinculação com a interface
+  /** Status já resolvido, para a interface não recalcular a cada render */
+  status: StatusTipo;
 };
