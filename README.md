@@ -3,9 +3,34 @@
 Aplicativo **React Native (Expo + TypeScript)** do sistema **Motiva Perseverance**,
 que monitora a **vegetação nas faixas de domínio de rodovias**.
 
-O app consome a API REST [`sensor-api`](../API-Motiva) (Spring Boot): lista as
+O app consome a API REST [`API-Motiva`](https://github.com/ViniiciusGoncalves/API-Motiva) (Spring Boot): lista as
 medições reais registradas no backend, pede novas coletas simuladas e exibe o
 status de cada leitura como **NORMAL**, **ALERTA** ou **CRÍTICO**.
+
+---
+
+## 🏁 Sprint 4 — Entrega Final
+
+| Item | Link |
+|------|------|
+| 📱 Frontend (este repositório) | https://github.com/ViniiciusGoncalves/Mobile-motiva |
+| 🖥️ Backend (API Spring Boot) | https://github.com/ViniiciusGoncalves/API-Motiva |
+| 🎬 Vídeo de demonstração (YouTube, não listado) | https://youtu.be/XSIzXgMms2Q |
+
+**Stack:** Spring Boot (Java 17) no backend + React Native / Expo / TypeScript no app.
+
+### 👤 Equipe
+
+| Nome | RM |
+|------|----|
+| Vinicius Gonçalves Carneiro | RM561784 |
+| Henrique Augusto Cruz | RM564586 |
+| Leonardo Martins Trevisan | RM563752 |
+| Guilherme Gama Massela | RM563635 |
+| Cristiano dos Santos | RM566444 |
+| Leonardo Eiji Fabian Kowata | RM562934 |
+
+**Turma:** 2EMR
 
 ---
 
@@ -32,9 +57,12 @@ O projeto só funciona com as **duas stacks no ar**: primeiro o backend, depois 
 
 ### 1. Backend (porta 8080)
 
+Requer **Java 17**. O Maven não precisa estar instalado: o backend traz o Maven Wrapper.
+
 ```bash
-cd ../API-Motiva
-mvn spring-boot:run      # ou rode SensorApiApplication pela IDE
+git clone https://github.com/ViniiciusGoncalves/API-Motiva.git
+cd API-Motiva
+./mvnw spring-boot:run   # Windows cmd/PowerShell: mvnw.cmd spring-boot:run
 ```
 
 Confira se a API respondeu antes de abrir o app:
@@ -193,6 +221,36 @@ JSON no tipo acima — com o `Sensor` aninhado e `data` como `Date` — é
 [`src/services/mapeadores.ts`](src/services/mapeadores.ts). O `status` da API
 (`NORMAL` / `ALERTA` / `CRITICO`) vira `StatusTipo`; se a resposta vier sem
 status, entra o `calcularStatus` local como fallback.
+
+---
+
+## 🚦 Como o status é calculado
+
+A regra principal fica **no backend** (`MedicaoService`), que conhece os limites
+de cada sensor e aplica uma margem de alerta de 10% sobre a faixa segura:
+
+```
+faixa  = limiteMaximo - limiteMinimo
+margem = faixa * 0.10
+
+CRITICO → valor < limiteMinimo  OU  valor > limiteMaximo
+ALERTA  → valor <= limiteMinimo + margem  OU  valor >= limiteMaximo - margem
+NORMAL  → caso contrário
+```
+
+O app só exibe o status recebido. O `calcularStatus` de
+[`src/utils/logica.ts`](src/utils/logica.ts) é um **plano B**, usado apenas se a
+resposta vier sem o campo `status`.
+
+---
+
+## 🔌 O que acontece ao parar o backend
+
+1. Com o app aberto, pare a API (`Ctrl+C` no terminal do backend).
+2. Recarregue o app.
+3. Aparece "CONSULTANDO A API" e, logo depois, o bloco vermelho **"BACKEND INDISPONÍVEL"**.
+   Nenhuma lista é exibida: o app **não tem dados locais nem simulação no front**.
+4. Suba o backend de novo e toque em **TENTAR NOVAMENTE**: as medições voltam.
 
 ---
 
